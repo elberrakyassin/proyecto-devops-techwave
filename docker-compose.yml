@@ -1,0 +1,11 @@
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: techwave-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    restart: always

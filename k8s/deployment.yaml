@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: techwave-deployment
+  labels:
+    app: techwave
+spec:
+  replicas: 2 # Escalabilidad solicitada
+  selector:
+    matchLabels:
+      app: techwave
+  template:
+    metadata:
+      labels:
+        app: techwave
+    spec:
+      containers:
+      - name: techwave-app
+        # Usaremos provisionalmente una imagen de ejemplo hasta que el CI/CD suba la tuya
+        image: nginx:alpine 
+        ports:
+        - containerPort: 80

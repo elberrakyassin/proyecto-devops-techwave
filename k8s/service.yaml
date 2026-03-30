@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: techwave-service
+spec:
+  type: LoadBalancer # Esto nos dará una IP pública real en Azure
+  selector:
+    app: techwave
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
