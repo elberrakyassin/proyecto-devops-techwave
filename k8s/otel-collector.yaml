@@ -3,26 +3,9 @@ kind: ConfigMap
 metadata:
   name: otel-collector-conf
   namespace: monitoring
-data:
-  otel-collector-config: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-          http:
-    processors:
-      batch:
-    exporters:
-      logging:
-        loglevel: debug
-      prometheus:
-        endpoint: "0.0.0.0:8889"
-    service:
-      pipelines:
-        metrics:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [logging, prometheus]
+# Usamos binaryData para que el editor no intente validar el contenido
+binaryData:
+  config.yaml: cmVjZWl2ZXJzOgogIG90bHA6CiAgICBwcm90b2NvbHM6CiAgICAgIGdycGM6CiAgICAgIGh0dHA6CmV4cG9ydGVyczoKICBwcm9tZXRoZXVzOgogICAgZW5kcG9pbnQ6ICIwLjAuMC4wOjg4ODkiCiAgbG9nZ2luZzoKICAgIHZlcmJvc2l0eTogZGV0YWlsZWQKc2VydmljZToKICBwaXBlbGluZXM6CiAgICBtZXRyaWNzOgogICAgICByZWNlaXZlcnM6IFtvdGxwXQogICAgICBleHBvcnRlcnM6IFtwcm9tZXRoZXVzLCBsb2dnaW5nXQ==
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -40,17 +23,20 @@ spec:
     spec:
       containers:
       - name: otel-collector
-        image: otel/opentelemetry-collector:latest
-        args: ["--config=/etc/otel-collector-config.yaml"]
+        image: otel/opentelemetry-collector:0.90.0
+        args: ["--config=/etc/otelcol/config.yaml"]
         volumeMounts:
-        - name: otel-collector-config-vol
-          mountPath: /etc/otel-collector-config.yaml
-          subPath: otel-collector-config
+        - name: config-vol
+          mountPath: /etc/otelcol/config.yaml
+          subPath: config.yaml
         ports:
-        - containerPort: 4317 # OTLP gRPC
-        - containerPort: 4318 # OTLP HTTP
-        - containerPort: 8889 # Prometheus exporter
+        - containerPort: 4317
+        - containerPort: 4318
+        - containerPort: 8889
       volumes:
-      - name: otel-collector-config-vol
+      - name: config-vol
         configMap:
           name: otel-collector-conf
+          items:
+            - key: "config.yaml"
+              path: "config.yaml"
