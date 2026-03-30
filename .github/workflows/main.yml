@@ -22,7 +22,6 @@ jobs:
         with:
           context: .
           push: true
-          # IMPORTANTE: Cambia 'yassinelberrak' si tu usuario de Docker Hub es distinto
           tags: yassinelberrak/techwave-app:latest
 
       - name: Login en Azure
@@ -38,8 +37,17 @@ jobs:
 
       - name: Desplegar en Kubernetes
         run: |
-          kubectl apply -f k8s/configmap.yaml
-          kubectl apply -f k8s/secrets.yaml
-          # Forzamos la actualización de la imagen para que use la nueva de Docker Hub
-          kubectl set image deployment/techwave-deployment techwave-app=yassinelberrak/techwave-app:latest
+          # 1. Aplicamos ConfigMaps y Secrets (Asegúrate de crearlos o comentar estas líneas si no existen)
+          # kubectl apply -f k8s/configmap.yaml
+          # kubectl apply -f k8s/secrets.yaml
+          
+          # 2. Aplicamos los dos despliegues (Blue y Green) para que estén sincronizados
+          kubectl apply -f k8s/techwave-blue.yaml
+          kubectl apply -f k8s/techwave-green.yaml
+          
+          # 3. Forzamos el reinicio para que descarguen la imagen 'latest' recién subida
+          kubectl rollout restart deployment techwave-deployment-blue
+          kubectl rollout restart deployment techwave-deployment-green
+          
+          # 4. Aplicamos el Service (que es el que decide quién recibe el tráfico)
           kubectl apply -f k8s/service.yaml
