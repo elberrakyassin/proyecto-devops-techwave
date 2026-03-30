@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: techwave-service
 spec:
-  type: LoadBalancer # Esto nos dará una IP pública real en Azure
+  type: LoadBalancer
   selector:
     app: techwave
+    version: v2
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 80
