@@ -19,6 +19,7 @@ spec:
     spec:
       containers:
       - name: techwave-app
-        image: nginx:alpine 
+        # Cambia esta línea:
+        image: yassinelberrak/techwave-app:latest 
         ports:
         - containerPort: 80

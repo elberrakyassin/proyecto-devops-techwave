@@ -1,23 +1,13 @@
-# Usamos una imagen ligera de Node.js basada en Alpine Linux
 FROM node:20-alpine
-
-# Creamos el directorio de trabajo dentro del contenedor
 WORKDIR /app
-
-# Copiamos solo los archivos de dependencias primero (optimización de capas)
-COPY src/package*.json ./
-
-# Instalamos solo las dependencias de producción
+COPY package*.json ./
 RUN npm install --only=production
-
-# Copiamos el resto del código de la aplicación
 COPY src/ .
 
-# Por seguridad, no ejecutamos como root
+# Forzamos a la aplicación a usar el puerto 80
+ENV PORT=80
+EXPOSE 80
+
+# Usamos el usuario no-privilegiado por seguridad (como hicimos en la Fase 1)
 USER node
-
-# Exponemos el puerto que definimos en la app
-EXPOSE 3000
-
-# Comando para arrancar la aplicación
 CMD ["node", "index.js"]
