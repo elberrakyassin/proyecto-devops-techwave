@@ -1,12 +1,32 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  # Cambiamos el nombre para forzar a Kubernetes a actualizar el despliegue
-  name: otel-collector-conf-v2
+  name: otel-collector-conf
   namespace: monitoring
-binaryData:
-  # Base64 con 'debug' en lugar de 'logging'
-  config.yaml: cmVjZWl2ZXJzOgogIG90bHA6CiAgICBwcm90b2NvbHM6CiAgICAgIGdycGM6CiAgICAgICAgZW5kcG9pbnQ6IDAuMC4wLjA6NDMxNwogICAgICBodHRwOgogICAgICAgIGVuZHBvaW50OiAwLjAuMC4wOjQzMTgKZXhwb3J0ZXJzOgogIGRlYnVnOgogICAgdmVyYm9zaXR5OiBkZXRhaWxlZAogIHByb21ldGhldXM6CiAgICBlbmRwb2ludDogMC4wLjAuMDo4ODg5CnNlcnZpY2U6CiAgcGlwZWxpbmVzOgogICAgbWV0cmljczoKICAgICAgcmVjZWl2ZXJzOiBbb3RscF0KICAgICAgZXhwb3J0ZXJzOiBbZGVidWcsIHByb21ldGhldXNd
+data:
+  # Usamos la clave config.yaml para que coincida con el Deployment
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+    processors:
+      batch:
+    exporters:
+      # CORRECCIÓN: 'debug' en lugar de 'logging'
+      debug:
+        verbosity: detailed
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug, prometheus]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -14,7 +34,6 @@ metadata:
   name: otel-collector
   namespace: monitoring
 spec:
-  # Esta sección ahora apuntará al nuevo ConfigMap, lo que cambiará el hash del Pod
   selector:
     matchLabels:
       app: otel-collector
@@ -38,25 +57,7 @@ spec:
       volumes:
       - name: config-vol
         configMap:
-          # Referencia al nuevo nombre
-          name: otel-collector-conf-v2
+          name: otel-collector-conf
           items:
-            - key: "config.yaml"
+            - key: "config.yaml" # ESTA CLAVE DEBE EXISTIR EN EL CONFIGMAP
               path: "config.yaml"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: otel-collector
-  namespace: monitoring
-spec:
-  type: ClusterIP
-  selector:
-    app: otel-collector
-  ports:
-    - name: otlp-grpc
-      port: 4317
-    - name: otlp-http
-      port: 4318
-    - name: prometheus
-      port: 8889
