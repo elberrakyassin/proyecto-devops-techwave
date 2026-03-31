@@ -4,8 +4,8 @@ metadata:
   name: otel-collector-conf
   namespace: monitoring
 binaryData:
-  # Este Base64 incluye: file_format: 1 + receivers + exporters + service
-  config.yaml: ZmlsZV9mb3JtYXQ6IDEKcmVjZWl2ZXJzOgogIG90bHA6CiAgICBwcm90b2NvbHM6CiAgICAgIGdycGM6CiAgICAgICAgZW5kcG9pbnQ6ICIwLjAuMC4wOjQzMTciCiAgICAgIGh0dHA6CiAgICAgICAgZW5kcG9pbnQ6ICIwLjAuMC4wOjQzMTgiCmV4cG9ydGVyczoKICBwcm9tZXRoZXVzOgogICAgZW5kcG9pbnQ6ICIwLjAuMC4wOjg4ODkiCiAgbG9nZ2luZzoKICAgIHZlcmJvc2l0eTogZGV0YWlsZWQKc2VydmljZToKICBwaXBlbGluZXM6CiAgICBtZXRyaWNzOgogICAgICByZWNlaXZlcnM6IFtvdGxwXQogICAgICBleHBvcnRlcnM6IFtwcm9tZXRoZXVzLCBsb2dnaW5nXQ==
+  # Base64 verificado: v0.88.0 contrib (sin file_format, estable)
+  config.yaml: cmVjZWl2ZXJzOgogIG90bHA6CiAgICBwcm90b2NvbHM6CiAgICAgIGdycGM6CiAgICAgICAgZW5kcG9pbnQ6IDAuMC4wLjA6NDMxNwogICAgICBodHRwOgogICAgICAgIGVuZHBvaW50OiAwLjAuMC4wOjQzMTgKZXhwb3J0ZXJzOgogIGxvZ2dpbmc6CiAgICB2ZXJib3NpdHk6IGRldGFpbGVkCiAgcHJvbWV0aGV1czogCiAgICBlbmRwb2ludDogMC4wLjAuMDo4ODg5CnNlcnZpY2U6CiAgcGlwZWxpbmVzOgogICAgbWV0cmljczoKICAgICAgcmVjZWl2ZXJzOiBbb3RscF0KICAgICAgZXhwb3J0ZXJzOiBbbG9nZ2luZywgcHJvbWV0aGV1c10=
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -23,7 +23,8 @@ spec:
     spec:
       containers:
       - name: otel-collector
-        image: otel/opentelemetry-collector:0.90.0
+        # Usamos la imagen contrib, que es el estándar para despliegues con Prometheus
+        image: otel/opentelemetry-collector-contrib:0.88.0
         args: ["--config=/etc/otelcol/config.yaml"]
         volumeMounts:
         - name: config-vol
@@ -40,3 +41,23 @@ spec:
           items:
             - key: "config.yaml"
               path: "config.yaml"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+    - name: prometheus
+      port: 8889
+      targetPort: 8889
