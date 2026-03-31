@@ -4,8 +4,8 @@ metadata:
   name: otel-collector-conf
   namespace: monitoring
 binaryData:
-  # Base64 verificado: v0.88.0 contrib (sin file_format, estable)
-  config.yaml: cmVjZWl2ZXJzOgogIG90bHA6CiAgICBwcm90b2NvbHM6CiAgICAgIGdycGM6CiAgICAgICAgZW5kcG9pbnQ6IDAuMC4wLjA6NDMxNwogICAgICBodHRwOgogICAgICAgIGVuZHBvaW50OiAwLjAuMC4wOjQzMTgKZXhwb3J0ZXJzOgogIGxvZ2dpbmc6CiAgICB2ZXJib3NpdHk6IGRldGFpbGVkCiAgcHJvbWV0aGV1czogCiAgICBlbmRwb2ludDogMC4wLjAuMDo4ODg5CnNlcnZpY2U6CiAgcGlwZWxpbmVzOgogICAgbWV0cmljczoKICAgICAgcmVjZWl2ZXJzOiBbb3RscF0KICAgICAgZXhwb3J0ZXJzOiBbbG9nZ2luZywgcHJvbWV0aGV1c10=
+  # Base64 actualizado: Sustituido 'logging' por 'debug' para compatibilidad v0.88+
+  config.yaml: cmVjZWl2ZXJzOgogIG90bHA6CiAgICBwcm90b2NvbHM6CiAgICAgIGdycGM6CiAgICAgICAgZW5kcG9pbnQ6IDAuMC4wLjA6NDMxNwogICAgICBodHRwOgogICAgICAgIGVuZHBvaW50OiAwLjAuMC4wOjQzMTgKZXhwb3J0ZXJzOgogIGRlYnVnOgogICAgdmVyYm9zaXR5OiBkZXRhaWxlZAogIHByb21ldGhldXM6CiAgICBlbmRwb2ludDogMC4wLjAuMDo4ODg5CnNlcnZpY2U6CiAgcGlwZWxpbmVzOgogICAgbWV0cmljczoKICAgICAgcmVjZWl2ZXJzOiBbb3RscF0KICAgICAgZXhwb3J0ZXJzOiBbZGVidWcsIHByb21ldGhldXNd
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -23,7 +23,6 @@ spec:
     spec:
       containers:
       - name: otel-collector
-        # Usamos la imagen contrib, que es el estándar para despliegues con Prometheus
         image: otel/opentelemetry-collector-contrib:0.88.0
         args: ["--config=/etc/otelcol/config.yaml"]
         volumeMounts:
