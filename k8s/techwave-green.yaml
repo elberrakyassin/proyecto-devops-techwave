@@ -4,7 +4,7 @@ metadata:
   name: techwave-deployment-green
   labels:
     app: techwave
-    version: v2
+    version: v2 # Esta es la clave de la v2
 spec:
   replicas: 2
   selector:
@@ -19,7 +19,6 @@ spec:
     spec:
       containers:
       - name: techwave-app
-        # Cambia esta línea:
         image: yassinelberrak/techwave-app:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 3000 # Puerto sincronizado con index.js
