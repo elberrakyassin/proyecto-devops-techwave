@@ -4,7 +4,6 @@ metadata:
   name: otel-collector-conf
   namespace: monitoring
 data:
-  # Usamos la clave config.yaml para que coincida con el Deployment
   config.yaml: |
     receivers:
       otlp:
@@ -16,7 +15,6 @@ data:
     processors:
       batch:
     exporters:
-      # CORRECCIÓN: 'debug' en lugar de 'logging'
       debug:
         verbosity: detailed
       prometheus:
@@ -46,18 +44,37 @@ spec:
       - name: otel-collector
         image: otel/opentelemetry-collector-contrib:0.88.0
         args: ["--config=/etc/otelcol/config.yaml"]
-        volumeMounts:
-        - name: config-vol
-          mountPath: /etc/otelcol/config.yaml
-          subPath: config.yaml
         ports:
         - containerPort: 4317
         - containerPort: 4318
         - containerPort: 8889
+        volumeMounts:
+        - name: config-vol
+          mountPath: /etc/otelcol/config.yaml
+          subPath: config.yaml
       volumes:
       - name: config-vol
         configMap:
           name: otel-collector-conf
-          items:
-            - key: "config.yaml" # ESTA CLAVE DEBE EXISTIR EN EL CONFIGMAP
-              path: "config.yaml"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318
+    - name: prometheus
+      protocol: TCP
+      port: 8889
+      targetPort: 8889

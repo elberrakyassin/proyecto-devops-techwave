@@ -6,7 +6,7 @@ spec:
   type: LoadBalancer
   selector:
     app: techwave
-    version: v1
+    version: v2
   ports:
     - protocol: TCP
       port: 80

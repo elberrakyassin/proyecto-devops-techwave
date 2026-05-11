@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector-monitor
+  namespace: monitoring
+  labels:
+    release: kube-stack-prometheus # Este label es OBLIGATORIO para tu instalación de Helm
+spec:
+  selector:
+    matchLabels:
+      app: otel-collector # Debe coincidir con el label de tu Service en otel-collector.yaml
+  endpoints:
+  - port: prometheus # El nombre del puerto que definimos en el Service (8889)
+    interval: 30s
